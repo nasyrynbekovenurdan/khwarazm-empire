@@ -52,8 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // AI Historian logic (Groq API)
-    const groqApiKey = "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";
+    // AI Historian logic (Vercel Serverless Backend)
     let chatHistory = [];
 
     aiChatBtn.addEventListener('click', async () => {
@@ -107,18 +106,18 @@ IMPORTANT: You MUST respond in this language code: ${lang.toUpperCase()}`;
                 ]
             };
 
-            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            // Hit the Vercel serverless function endpoint instead
+            const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${groqApiKey}`
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify(payload)
             });
 
             if (!response.ok) {
-                const errData = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errData}`);
+                const errData = await response.json();
+                throw new Error(`HTTP ${response.status}: ${errData.error || 'Server Error'}`);
             }
             
             const data = await response.json();
@@ -143,7 +142,7 @@ IMPORTANT: You MUST respond in this language code: ${lang.toUpperCase()}`;
             aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
 
         } catch (error) {
-            console.error("Groq Error:", error);
+            console.error("Chat API Error:", error);
             aiChatMessages.removeChild(loadingMsg);
             
             const errorMsg = document.createElement('div');
